@@ -7,11 +7,9 @@ module.exports = function(feature, tolerance, highQuality){
       coordinates: []
     };
     var pts = feature.geometry.coordinates.map(function(coord) {
-      console.log(1)
       return {x: coord[0], y: coord[1]};
     });
     line.coordinates = simplify(pts, tolerance, highQuality).map(function(coords){
-      console.log(coords)
       return [coords.x, coords.y];
     });
     
@@ -21,7 +19,17 @@ module.exports = function(feature, tolerance, highQuality){
       type: 'Polygon',
       coordinates: []
     };
-  } 
+    feature.geometry.coordinates.forEach(function(ring){
+      var pts = ring.map(function(coord) {
+        return {x: coord[0], y: coord[1]};
+      });
+      var simpleRing = simplify(pts, tolerance, highQuality).map(function(coords){
+        return [coords.x, coords.y];
+      });
+      poly.coordinates.push(simpleRing);
+    });
+    return simpleFeature(poly, feature.properties)
+  }
 }
 
 function simpleFeature (geom, properties) {
