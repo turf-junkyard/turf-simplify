@@ -1,15 +1,30 @@
 var simplify = require('../');
 var test = require('tape');
-var glob = require('glob');
 var fs = require('fs');
 
-var REGEN = process.env.REGEN;
+test('simplify -- line', function (t) {
+  var line = JSON.parse(fs.readFileSync(__dirname+'/fixtures/in/linestring.geojson'));
 
-test('simplify', function(t){
-  glob.sync(__dirname + '/fixtures/in/*.geojson').forEach(function(input) {
-      var output = simplify(JSON.parse(fs.readFileSync(input)), 50, 0);
-      if (REGEN) fs.writeFileSync(input.replace('/in/', '/out/'), JSON.stringify(output));
-      t.deepEqual(output, JSON.parse(fs.readFileSync(input.replace('/in/', '/out/'))), input);
-  });
+  var simplified = simplify(line, .01, false);
+  fs.writeFileSync(__dirname+'/fixtures/out/linestring_out.geojson', JSON.stringify(simplified))
+
   t.end();
-})
+});
+
+test('simplify -- polygon', function (t) {
+  var polygon = JSON.parse(fs.readFileSync(__dirname+'/fixtures/in/polygon.geojson'));
+
+  var simplified = simplify(polygon, 1, false);
+  fs.writeFileSync(__dirname+'/fixtures/out/polygon_out.geojson', JSON.stringify(simplified))
+
+  t.end();
+});
+
+test('simplify -- argentina', function (t) {
+  var argentina = JSON.parse(fs.readFileSync(__dirname+'/fixtures/in/argentina.geojson'));
+
+  var simplified = simplify(argentina, 1, false);
+  fs.writeFileSync(__dirname+'/fixtures/out/argentina_out.geojson', JSON.stringify(simplified))
+
+  t.end();
+});

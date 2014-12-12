@@ -30,6 +30,6 @@
     "tape": "~3.0.3"
   },
   "dependencies": {
-    "topojson": "~1.6.18"
+    "simplify-js": "^1.2.1"
   }
 }
