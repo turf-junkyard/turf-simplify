@@ -25,10 +25,11 @@
   },
   "homepage": "https://github.com/Turfjs/turf-simplify",
   "devDependencies": {
-    "tape": "~2.13.1",
-    "glob": "~4.0.0"
+    "benchmark": "^1.0.0",
+    "glob": "~4.3.1",
+    "tape": "~3.0.3"
   },
   "dependencies": {
-    "topojson": "~1.6.14"
+    "topojson": "~1.6.18"
   }
 }

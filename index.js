@@ -1,5 +1,5 @@
 // use topojson.simplify to simplify points to a given tolerence then convert back to geojson
-var topojson = require('topojson')
+var topojson = require('topojson');
 
 module.exports = function(fc, quantization, minimumArea){
   var options = {
@@ -10,10 +10,9 @@ module.exports = function(fc, quantization, minimumArea){
       properties[key] = value;
       return true;
     }
-  }
-  var topo = topojson.topology({name:fc}, options)
+  };
+  var topo = topojson.topology({name:fc}, options);
+  topojson.simplify(topo, options);
 
-  topojson.simplify(topo, options)
-
-  return topojson.feature(topo, topo.objects.name)
+  return topojson.feature(topo, topo.objects.name);
 }

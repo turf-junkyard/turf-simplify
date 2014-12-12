@@ -1,9 +1,9 @@
-var simplify = require('../'),
-  test = require('tape'),
-  glob = require('glob'),
-  fs = require('fs')
+var simplify = require('../');
+var test = require('tape');
+var glob = require('glob');
+var fs = require('fs');
 
-var REGEN = false;
+var REGEN = process.env.REGEN;
 
 test('simplify', function(t){
   glob.sync(__dirname + '/fixtures/in/*.geojson').forEach(function(input) {
