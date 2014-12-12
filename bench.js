@@ -2,7 +2,6 @@ var simplify = require('./');
 var Benchmark = require('benchmark');
 var fs = require('fs');
 
-//console.log(JSON.parse(fs.readFileSync(__dirname+'/test/fixtures/in/complexLine.geojson')))
 var line = JSON.parse(fs.readFileSync(__dirname+'/test/fixtures/in/linestring.geojson'));
 var poly = JSON.parse(fs.readFileSync(__dirname+'/test/fixtures/in/polygon.geojson'));
 var argentina = JSON.parse(fs.readFileSync(__dirname+'/test/fixtures/in/argentina.geojson'));
