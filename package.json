@@ -1,6 +1,6 @@
 {
   "name": "turf-simplify",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "simplify geographic shapes",
   "main": "index.js",
   "directories": {
