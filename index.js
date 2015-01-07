@@ -1,16 +1,16 @@
 var simplify = require('simplify-js');
 
 /**
- * Simplifies a `GeoJSONFeature` containing a `GeoJSONLineString` or
- * `GeoJSONPolygon` geometry. Internally uses [simplify-js](http://mourner.github.io/simplify-js/)
+ * Simplifies a {@link Feature} containing a {@link LineString} or
+ * {@link Polygon} geometry. Internally uses [simplify-js](http://mourner.github.io/simplify-js/)
  * to perform simplification.
  *
  * @module turf/simplify
- * @param {GeoJSONFeature} feature - a feature to be simplified
+ * @param {Feature} feature - a feature to be simplified
  * @param {number} tolerance - simplification tolerance
  * @param {boolean} highQuality - whether or not to spend more time to create
  * a higher-quality simplification with a different algorithm
- * @return {GeoJSONFeature} output
+ * @return {Feature} output
  * @example
  * var quantization = 50;
  * var minimumArea = 0;
