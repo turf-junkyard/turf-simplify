@@ -6,11 +6,11 @@ var simplify = require('simplify-js');
  * to perform simplification.
  *
  * @module turf/simplify
- * @param {Feature} feature - a feature to be simplified
+ * @param {Feature} feature - a {@link LineString} or {@link Polygon} feature to be simplified
  * @param {number} tolerance - simplification tolerance
  * @param {boolean} highQuality - whether or not to spend more time to create
  * a higher-quality simplification with a different algorithm
- * @return {Feature} output
+ * @return {Feature} a simplified feature
  * @example
  * var quantization = 50;
  * var minimumArea = 0;
