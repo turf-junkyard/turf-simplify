@@ -1,14 +1,12 @@
 var simplify = require('simplify-js');
 
 /**
- * Simplifies a {@link Feature} containing a {@link LineString} or
- * {@link Polygon} geometry. Internally uses [simplify-js](http://mourner.github.io/simplify-js/)
- * to perform simplification.
+ * Takes a {@link LineString} or {@link Polygon} feature and returns a simplified version. Internally uses [simplify-js](http://mourner.github.io/simplify-js/) to perform simplification.
  *
  * @module turf/simplify
- * @param {Feature} feature - a {@link LineString} or {@link Polygon} feature to be simplified
- * @param {number} tolerance - simplification tolerance
- * @param {boolean} highQuality - whether or not to spend more time to create
+ * @param {Feature} feature a {@link LineString} or {@link Polygon} feature to be simplified
+ * @param {number} tolerance simplification tolerance
+ * @param {boolean} highQuality whether or not to spend more time to create
  * a higher-quality simplification with a different algorithm
  * @return {Feature} a simplified feature
  * @example
@@ -35,6 +33,7 @@ var simplify = require('simplify-js');
  *  [-70.603637, -33.399918]
  * ]]);
  * var tolerance = 0.01;
+ *
  * var simplified = turf.simplify(
  *  feature, tolerance, false);
  *
