@@ -76,15 +76,14 @@ module.exports = function(feature, tolerance, highQuality){
       coordinates: []
     };
     feature.geometry.coordinates.forEach(function(rings){
-      var simpleRings = [];
-      rings.forEach(function (ring) {
+      var simpleRings = rings.map(function (ring) {
         var pts = ring.map(function(coord) {
           return {x: coord[0], y: coord[1]};
         });
         var simpleRing = simplify(pts, tolerance, highQuality).map(function(coords){
           return [coords.x, coords.y];
         });
-        simpleRings.push(simpleRing);
+        return simpleRing;
       });
       poly.coordinates.push(simpleRings);
     });
