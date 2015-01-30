@@ -34,7 +34,7 @@ test('simplify -- multipolygon', function (t) {
   t.equal(simplified.geometry.coordinates.length, 2);
   t.equal(typeof simplified.geometry.coordinates[0][0][0][0], 'number');
   t.equal(typeof simplified.geometry.coordinates[1][0][0][0], 'number');
-  fs.writeFileSync(__dirname+'/fixtures/out/polygon_out.geojson', JSON.stringify(simplified))
+  fs.writeFileSync(__dirname+'/fixtures/out/multipolygon_out.geojson', JSON.stringify(simplified))
 
   t.end();
 });
