@@ -62,7 +62,7 @@ module.exports = function(feature, tolerance, highQuality){
     line.coordinates = simplify(pts, tolerance, highQuality).map(function(coords){
       return [coords.x, coords.y];
     });
-    
+
     return simpleFeature(line, feature.properties);
   } else if(feature.geometry.type === 'Polygon') {
     var poly = {
@@ -77,6 +77,24 @@ module.exports = function(feature, tolerance, highQuality){
         return [coords.x, coords.y];
       });
       poly.coordinates.push(simpleRing);
+    });
+    return simpleFeature(poly, feature.properties)
+  } else if(feature.geometry.type === 'MultiPolygon') {
+    var poly = {
+      type: 'MultiPolygon',
+      coordinates: []
+    };
+    feature.geometry.coordinates.forEach(function(rings){
+      var simpleRings = rings.map(function (ring) {
+        var pts = ring.map(function(coord) {
+          return {x: coord[0], y: coord[1]};
+        });
+        var simpleRing = simplify(pts, tolerance, highQuality).map(function(coords){
+          return [coords.x, coords.y];
+        });
+        return simpleRing;
+      });
+      poly.coordinates.push(simpleRings);
     });
     return simpleFeature(poly, feature.properties)
   }
