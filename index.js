@@ -1,15 +1,15 @@
 var simplify = require('simplify-js');
 
 /**
- * Takes a {@link LineString} or {@link Polygon} feature and returns a simplified version. Internally uses [simplify-js](http://mourner.github.io/simplify-js/) to perform simplification.
+ * Takes a {@link LineString} or {@link Polygon} and returns a simplified version. Internally uses [simplify-js](http://mourner.github.io/simplify-js/) to perform simplification.
  *
  * @module turf/simplify
  * @category transformation
- * @param {Feature} feature a {@link LineString} or {@link Polygon} feature to be simplified
- * @param {number} tolerance simplification tolerance
- * @param {boolean} highQuality whether or not to spend more time to create
+ * @param {Feature<(LineString|Polygon)>} feature feature to be simplified
+ * @param {Number} tolerance simplification tolerance
+ * @param {Boolean} highQuality whether or not to spend more time to create
  * a higher-quality simplification with a different algorithm
- * @return {Feature} a simplified feature
+ * @return {Feature<(LineString|Polygon)>} a simplified feature
  * @example
   * var feature = {
  *   "type": "Feature",
