@@ -50,7 +50,7 @@ var simplify = require('simplify-js');
  *
  * //=simplified
  */
-module.exports = function(feature, tolerance, highQuality){
+module.exports = function(feature, tolerance, highQuality) {
   if(feature.geometry.type === 'LineString') {
     var line = {
       type: 'LineString',
@@ -59,28 +59,28 @@ module.exports = function(feature, tolerance, highQuality){
     var pts = feature.geometry.coordinates.map(function(coord) {
       return {x: coord[0], y: coord[1]};
     });
-    line.coordinates = simplify(pts, tolerance, highQuality).map(function(coords){
+    line.coordinates = simplify(pts, tolerance, highQuality).map(function(coords) {
       return [coords.x, coords.y];
     });
-    
+
     return simpleFeature(line, feature.properties);
   } else if(feature.geometry.type === 'Polygon') {
     var poly = {
       type: 'Polygon',
       coordinates: []
     };
-    feature.geometry.coordinates.forEach(function(ring){
+    feature.geometry.coordinates.forEach(function(ring) {
       var pts = ring.map(function(coord) {
         return {x: coord[0], y: coord[1]};
       });
-      var simpleRing = simplify(pts, tolerance, highQuality).map(function(coords){
+      var simpleRing = simplify(pts, tolerance, highQuality).map(function(coords) {
         return [coords.x, coords.y];
       });
       poly.coordinates.push(simpleRing);
     });
-    return simpleFeature(poly, feature.properties)
+    return simpleFeature(poly, feature.properties);
   }
-}
+};
 
 function simpleFeature (geom, properties) {
   return {
