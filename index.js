@@ -76,6 +76,14 @@ module.exports = function(feature, tolerance, highQuality) {
       var simpleRing = simplify(pts, tolerance, highQuality).map(function(coords) {
         return [coords.x, coords.y];
       });
+      for (var i = 0; i < 4; i++) {
+        if (!simpleRing[i]) simpleRing.push(simpleRing[0])
+      }
+      if (
+        (simpleRing[simpleRing.length-1][0] !== simpleRing[0][0]) ||
+        (simpleRing[simpleRing.length-1][1] !== simpleRing[0][1])) {
+        simpleRing.push(simpleRing[0])
+      }
       poly.coordinates.push(simpleRing);
     });
     return simpleFeature(poly, feature.properties);
