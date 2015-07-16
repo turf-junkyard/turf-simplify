@@ -76,12 +76,14 @@ module.exports = function(feature, tolerance, highQuality) {
       var simpleRing = simplify(pts, tolerance, highQuality).map(function(coords) {
         return [coords.x, coords.y];
       });
-      for (var i = 0; i < 4; i++) {
-        if (!simpleRing[i]) simpleRing.push(simpleRing[0])
+      //remove 1 percent of tolerance until enough points to make a triangle
+      while (!checkTriangle(simpleRing)) {
+        tolerance -= tolerance * .01
+        simpleRing = simplify(pts, tolerance, highQuality).map(function(coords) {
+          return [coords.x, coords.y];
+        });
       }
-      if (
-        (simpleRing[simpleRing.length-1][0] !== simpleRing[0][0]) ||
-        (simpleRing[simpleRing.length-1][1] !== simpleRing[0][1])) {
+      if (simpleRing.length === 3) {
         simpleRing.push(simpleRing[0])
       }
       poly.coordinates.push(simpleRing);
@@ -89,6 +91,21 @@ module.exports = function(feature, tolerance, highQuality) {
     return simpleFeature(poly, feature.properties);
   }
 };
+
+/*
+* returns true if ring is a triangle
+*/
+function checkTriangle(ring) {
+  if (ring.length < 3) {
+    return false
+    //if the last point is the same as the first, it's not a triangle
+  } else if (ring.length === 3 &&
+      ((ring[2][0] === ring[0][0]) && (ring[2][1] === ring[0][1]))) {
+    return false
+  } else {
+    return true
+  }
+}
 
 function simpleFeature (geom, properties) {
   return {
