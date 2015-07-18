@@ -54,39 +54,42 @@ module.exports = function(feature, tolerance, highQuality) {
   if(feature.geometry.type === 'LineString') {
     var line = {
       type: 'LineString',
-      coordinates: []
+      coordinates: simplifyLine(feature.geometry.coordinates, tolerance, highQuality)
     };
-    var pts = feature.geometry.coordinates.map(function(coord) {
-      return {x: coord[0], y: coord[1]};
-    });
-    line.coordinates = simplify(pts, tolerance, highQuality).map(function(coords) {
-      return [coords.x, coords.y];
-    });
 
     return simpleFeature(line, feature.properties);
+  } else if(feature.geometry.type === 'MultiLineString') {
+    var multiline = {
+      type: 'MultiLineString',
+      coordinates: []
+    };
+    // simplify each of the lines in the MultiLineString
+    feature.geometry.coordinates.forEach(function(lines) {
+      multiline.coordinates.push(simplifyLine(lines, tolerance, highQuality));
+    });
+
+    return simpleFeature(multiline, feature.properties);
   } else if(feature.geometry.type === 'Polygon') {
     var poly = {
       type: 'Polygon',
+      coordinates: simplifyPolygon(feature.geometry.coordinates)
+    };
+
+    return simpleFeature(poly, feature.properties);
+  } else if(feature.geometry.type === 'MultiPolygon') {
+    var multipoly = {
+      type: 'MultiPolygon',
       coordinates: []
     };
-    feature.geometry.coordinates.forEach(function(ring) {
-      var pts = ring.map(function(coord) {
-        return {x: coord[0], y: coord[1]};
-      });
-      var simpleRing = simplify(pts, tolerance, highQuality).map(function(coords) {
-        return [coords.x, coords.y];
-      });
-      for (var i = 0; i < 4; i++) {
-        if (!simpleRing[i]) simpleRing.push(simpleRing[0])
-      }
-      if (
-        (simpleRing[simpleRing.length-1][0] !== simpleRing[0][0]) ||
-        (simpleRing[simpleRing.length-1][1] !== simpleRing[0][1])) {
-        simpleRing.push(simpleRing[0])
-      }
-      poly.coordinates.push(simpleRing);
+    // simplify each set of rings in the MultiPolygon
+    feature.geometry.coordinates.forEach(function(rings) {
+      multipoly.coordinates.push(simplifyPolygon(rings, tolerance, highQuality));
     });
-    return simpleFeature(poly, feature.properties);
+
+    return simpleFeature(multipoly, feature.properties);
+  } else {
+    // unsupported geometry type supplied
+    return feature;
   }
 };
 
@@ -97,3 +100,37 @@ function simpleFeature (geom, properties) {
     properties: properties
   };
 }
+
+function simplifyLine (coordinates, tolerance, highQuality) {
+  var simplifiedCoordinates = [];
+  var pts = coordinates.map(function(coord) {
+    return {x: coord[0], y: coord[1]};
+  });
+  simplifiedCoordinates = simplify(pts, tolerance, highQuality).map(function(coords) {
+    return [coords.x, coords.y];
+  });
+
+  return simplifiedCoordinates;
+}
+
+function simplifyPolygon (coordinates, tolerance, highQuality) {
+  var simplifiedCoordinates = [];
+  coordinates.forEach(function(ring) {
+    var pts = ring.map(function(coord) {
+      return {x: coord[0], y: coord[1]};
+    });
+    var simpleRing = simplify(pts, tolerance, highQuality).map(function(coords) {
+      return [coords.x, coords.y];
+    });
+    for (var i = 0; i < 4; i++) {
+      if (!simpleRing[i]) simpleRing.push(simpleRing[0])
+    }
+    if (
+      (simpleRing[simpleRing.length-1][0] !== simpleRing[0][0]) ||
+      (simpleRing[simpleRing.length-1][1] !== simpleRing[0][1])) {
+      simpleRing.push(simpleRing[0])
+    }
+    simplifiedCoordinates.push(simpleRing);
+  });
+  return simplifiedCoordinates;
+};
