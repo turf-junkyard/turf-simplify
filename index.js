@@ -73,6 +73,9 @@ module.exports = function(feature, tolerance, highQuality) {
       var pts = ring.map(function(coord) {
         return {x: coord[0], y: coord[1]};
       });
+      if (pts.length < 4) {
+        throw new Error('Invalid polygon');
+      }
       var simpleRing = simplify(pts, tolerance, highQuality).map(function(coords) {
         return [coords.x, coords.y];
       });
