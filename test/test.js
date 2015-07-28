@@ -33,7 +33,7 @@ test('simplify -- multiline', function (t) {
 test('simplify -- polygon', function (t) {
   var polygon = JSON.parse(fs.readFileSync(__dirname+'/fixtures/in/polygon.geojson'));
 
-  var simplified = simplify(polygon, 0.1, false);
+  var simplified = simplify(polygon, 1, false);
   t.equal(simplified.type, 'Feature');
   t.equal(typeof simplified.geometry.coordinates[0][0][0], 'number');
   fs.writeFileSync(__dirname+'/fixtures/out/polygon_out.geojson', JSON.stringify(simplified, null, 2));
