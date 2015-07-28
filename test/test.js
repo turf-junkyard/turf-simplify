@@ -41,6 +41,17 @@ test('simplify -- polygon', function (t) {
   t.end();
 });
 
+test('simplify -- over simplify polygon', function (t) {
+  var polygon = JSON.parse(fs.readFileSync(__dirname+'/fixtures/in/simple.geojson'));
+
+  var simplified = simplify(polygon, 100, false);
+  t.equal(simplified.type, 'Feature');
+  t.equal(typeof simplified.geometry.coordinates[0][0][0], 'number');
+  fs.writeFileSync(__dirname+'/fixtures/out/simple_out.geojson', JSON.stringify(simplified));
+
+  t.end();
+});
+
 test('simplify -- multipolygon', function (t) {
   var multipolygon = JSON.parse(fs.readFileSync(__dirname+'/fixtures/in/multipolygon.geojson'));
 
@@ -68,10 +79,10 @@ test('simplify -- featurecollection', function (t) {
 test('simplify -- argentina', function (t) {
   var argentina = JSON.parse(fs.readFileSync(__dirname+'/fixtures/in/argentina.geojson'));
 
-  var simplified = simplify(argentina, .1, false);
+  var simplified = simplify(argentina, 0.1, false);
   t.equal(simplified.type, 'Feature');
-  t.equal(typeof simplified.geometry.coordinates[0][0][0], 'number')
-  fs.writeFileSync(__dirname+'/fixtures/out/argentina_out.geojson', JSON.stringify(simplified, null, 2))
+  t.equal(typeof simplified.geometry.coordinates[0][0][0], 'number');
+  fs.writeFileSync(__dirname+'/fixtures/out/argentina_out.geojson', JSON.stringify(simplified, null, 2));
 
   t.end();
 });

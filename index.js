@@ -109,15 +109,48 @@ function simplifyHelper (feature, tolerance, highQuality) {
       type: 'MultiPolygon',
       coordinates: []
     };
-    // simplify each set of rings in the MultiPolygon
-    feature.geometry.coordinates.forEach(function(rings) {
-      multipoly.coordinates.push(simplifyPolygon(rings, tolerance, highQuality));
+    feature.geometry.coordinates.forEach(function(ring) {
+      var pts = ring.map(function(coord) {
+        return {x: coord[0], y: coord[1]};
+      });
+      if (pts.length < 4) {
+        throw new Error('Invalid polygon');
+      }
+      var simpleRing = simplify(pts, tolerance, highQuality).map(function(coords) {
+        return [coords.x, coords.y];
+      });
+      //remove 1 percent of tolerance until enough points to make a triangle
+      while (!checkTriangle(simpleRing)) {
+        tolerance -= tolerance * .01
+        simpleRing = simplify(pts, tolerance, highQuality).map(function(coords) {
+          return [coords.x, coords.y];
+        });
+      }
+      if (simpleRing.length === 3) {
+        simpleRing.push(simpleRing[0])
+      }
+      poly.coordinates.push(simpleRing);
     });
 
     return multipoly;
   } else {
     // unsupported geometry type supplied
     return feature;
+  }
+}
+
+/*
+* returns true if ring is a triangle
+*/
+function checkTriangle(ring) {
+  if (ring.length < 3) {
+    return false
+    //if the last point is the same as the first, it's not a triangle
+  } else if (ring.length === 3 &&
+      ((ring[2][0] === ring[0][0]) && (ring[2][1] === ring[0][1]))) {
+    return false
+  } else {
+    return true
   }
 }
 
