@@ -58,9 +58,14 @@ module.exports = function(feature, tolerance, highQuality) {
     return simpleFeature(simplified, feature.properties);
   } else if (feature.type === 'FeatureCollection') {
     feature.features = feature.features.map(function (f) {
-      simplified = simplifyHelper(f);
-
-      return simpleFeature(simplified, f.properties);
+      simplified = simplifyHelper(f, tolerance, highQuality);
+      // we create simpleFeature here because it doesn't apply to GeometryCollection
+      // so we can't create it at simplifyHelper()
+      if (['LineString', 'MultiLineString', 'Polygon', 'MultiPolygon'].indexOf(simplified.type) > -1) {
+        return simpleFeature(simplified, f.properties);
+      } else {
+        return simplified;
+      }
     });
 
     return feature;
@@ -69,7 +74,7 @@ module.exports = function(feature, tolerance, highQuality) {
       simplified = simplifyHelper({
         type: 'Feature',
         geometry: g
-      });
+      }, tolerance, highQuality);
 
       return simplified; // GeometryCollection shouldn't have properties
     });
@@ -100,8 +105,8 @@ function simplifyHelper (feature, tolerance, highQuality) {
   } else if(feature.geometry.type === 'Polygon') {
     var poly = {
       type: 'Polygon',
-      coordinates: simplifyPolygon(feature.geometry.coordinates)
-    };
+      coordinates: simplifyPolygon(feature.geometry.coordinates, tolerance, highQuality)
+    }; console.log(poly);
 
     return poly;
   } else if(feature.geometry.type === 'MultiPolygon') {
@@ -109,27 +114,9 @@ function simplifyHelper (feature, tolerance, highQuality) {
       type: 'MultiPolygon',
       coordinates: []
     };
-    feature.geometry.coordinates.forEach(function(ring) {
-      var pts = ring.map(function(coord) {
-        return {x: coord[0], y: coord[1]};
-      });
-      if (pts.length < 4) {
-        throw new Error('Invalid polygon');
-      }
-      var simpleRing = simplify(pts, tolerance, highQuality).map(function(coords) {
-        return [coords.x, coords.y];
-      });
-      //remove 1 percent of tolerance until enough points to make a triangle
-      while (!checkTriangle(simpleRing)) {
-        tolerance -= tolerance * .01
-        simpleRing = simplify(pts, tolerance, highQuality).map(function(coords) {
-          return [coords.x, coords.y];
-        });
-      }
-      if (simpleRing.length === 3) {
-        simpleRing.push(simpleRing[0])
-      }
-      poly.coordinates.push(simpleRing);
+    // simplify each set of rings in the MultiPolygon
+    feature.geometry.coordinates.forEach(function(rings) {
+      multipoly.coordinates.push(simplifyPolygon(rings, tolerance, highQuality));
     });
 
     return multipoly;
@@ -144,13 +131,13 @@ function simplifyHelper (feature, tolerance, highQuality) {
 */
 function checkTriangle(ring) {
   if (ring.length < 3) {
-    return false
+    return false;
     //if the last point is the same as the first, it's not a triangle
   } else if (ring.length === 3 &&
       ((ring[2][0] === ring[0][0]) && (ring[2][1] === ring[0][1]))) {
-    return false
+    return false;
   } else {
-    return true
+    return true;
   }
 }
 
@@ -180,9 +167,22 @@ function simplifyPolygon (coordinates, tolerance, highQuality) {
     var pts = ring.map(function(coord) {
       return {x: coord[0], y: coord[1]};
     });
+    if (pts.length < 4) {
+      throw new Error('Invalid polygon');
+    }
     var simpleRing = simplify(pts, tolerance, highQuality).map(function(coords) {
       return [coords.x, coords.y];
     });
+    //remove 1 percent of tolerance until enough points to make a triangle
+    while (!checkTriangle(simpleRing)) {
+      tolerance -= tolerance * 0.01;
+      simpleRing = simplify(pts, tolerance, highQuality).map(function(coords) {
+        return [coords.x, coords.y];
+      });
+    }
+    if (simpleRing.length === 3) {
+      simpleRing.push(simpleRing[0]);
+    }
     for (var i = 0; i < 4; i++) {
       if (!simpleRing[i]) simpleRing.push(simpleRing[0]);
     }
