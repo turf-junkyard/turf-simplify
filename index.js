@@ -5,7 +5,7 @@ var simplify = require('simplify-js');
  *
  * @module turf/simplify
  * @category transformation
- * @param {Feature<(LineString|Polygon)>} feature feature to be simplified
+ * @param {Feature<(LineString|Polygon|MultiLineString|MultiPolygon)>|<GeometryCollection>} feature feature to be simplified
  * @param {Number} tolerance simplification tolerance
  * @param {Boolean} highQuality whether or not to spend more time to create
  * a higher-quality simplification with a different algorithm
@@ -51,13 +51,41 @@ var simplify = require('simplify-js');
  * //=simplified
  */
 module.exports = function(feature, tolerance, highQuality) {
+  var simplified;
+  if (feature.type === 'Feature') {
+    simplified = simplifyHelper(feature, tolerance, highQuality);
+
+    return simpleFeature(simplified, feature.properties);
+  } else if (feature.type === 'FeatureCollection') {
+    feature.features = feature.features.map(function (f) {
+      simplified = simplifyHelper(f);
+
+      return simpleFeature(simplified, f.properties);
+    });
+
+    return feature;
+  } else if (feature.type === 'GeometryCollection') {
+    feature.geometries.map(function (g) {
+      simplified = simplifyHelper({
+        type: 'Feature',
+        geometry: g
+      });
+
+      return simplified; // GeometryCollection shouldn't have properties
+    });
+  } else {
+    return feature;
+  }
+};
+
+function simplifyHelper (feature, tolerance, highQuality) {
   if(feature.geometry.type === 'LineString') {
     var line = {
       type: 'LineString',
       coordinates: simplifyLine(feature.geometry.coordinates, tolerance, highQuality)
     };
 
-    return simpleFeature(line, feature.properties);
+    return line;
   } else if(feature.geometry.type === 'MultiLineString') {
     var multiline = {
       type: 'MultiLineString',
@@ -68,14 +96,14 @@ module.exports = function(feature, tolerance, highQuality) {
       multiline.coordinates.push(simplifyLine(lines, tolerance, highQuality));
     });
 
-    return simpleFeature(multiline, feature.properties);
+    return multiline;
   } else if(feature.geometry.type === 'Polygon') {
     var poly = {
       type: 'Polygon',
       coordinates: simplifyPolygon(feature.geometry.coordinates)
     };
 
-    return simpleFeature(poly, feature.properties);
+    return poly;
   } else if(feature.geometry.type === 'MultiPolygon') {
     var multipoly = {
       type: 'MultiPolygon',
@@ -86,12 +114,12 @@ module.exports = function(feature, tolerance, highQuality) {
       multipoly.coordinates.push(simplifyPolygon(rings, tolerance, highQuality));
     });
 
-    return simpleFeature(multipoly, feature.properties);
+    return multipoly;
   } else {
     // unsupported geometry type supplied
     return feature;
   }
-};
+}
 
 function simpleFeature (geom, properties) {
   return {
@@ -123,14 +151,14 @@ function simplifyPolygon (coordinates, tolerance, highQuality) {
       return [coords.x, coords.y];
     });
     for (var i = 0; i < 4; i++) {
-      if (!simpleRing[i]) simpleRing.push(simpleRing[0])
+      if (!simpleRing[i]) simpleRing.push(simpleRing[0]);
     }
     if (
       (simpleRing[simpleRing.length-1][0] !== simpleRing[0][0]) ||
       (simpleRing[simpleRing.length-1][1] !== simpleRing[0][1])) {
-      simpleRing.push(simpleRing[0])
+      simpleRing.push(simpleRing[0]);
     }
     simplifiedCoordinates.push(simpleRing);
   });
   return simplifiedCoordinates;
-};
+}
