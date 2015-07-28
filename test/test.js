@@ -78,6 +78,28 @@ test('simplify -- featurecollection', function (t) {
   t.end();
 });
 
+test('simplify -- geometrycollection', function (t) {
+  var geometrycollection = JSON.parse((fs.readFileSync(__dirname+'/fixtures/in/geometrycollection.geojson')));
+
+  var simplified = simplify(geometrycollection, 0.01, false);
+  t.equal(simplified.type, 'GeometryCollection');
+  simplified.geometries.forEach(function (g) {
+    if (g.type === 'LineString') {
+      t.equal(typeof g.coordinates[0][0], 'number');
+    } else if (g.type === 'MultiLineString' || g.type === 'Polygon') {
+      // intentionally only checking the first line for multilinestring, test covered elsewhere
+      t.equal(typeof g.coordinates[0][0][0], 'number');
+    } else if (g.type === 'MultiPolygon') {
+      // intentionally only checking the first ring, test covered elsewhere
+      t.equal(typeof g.coordinates[0][0][0][0], 'number');
+    }
+  });
+
+  fs.writeFileSync(__dirname+'/fixtures/out/geometrycollection_out.geojson', JSON.stringify(simplified, null, 2));
+
+  t.end();
+});
+
 test('simplify -- argentina', function (t) {
   var argentina = JSON.parse(fs.readFileSync(__dirname+'/fixtures/in/argentina.geojson'));
 

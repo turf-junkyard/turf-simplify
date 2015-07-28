@@ -5,11 +5,11 @@ var simplify = require('simplify-js');
  *
  * @module turf/simplify
  * @category transformation
- * @param {Feature<(LineString|Polygon|MultiLineString|MultiPolygon)>|<GeometryCollection>} feature feature to be simplified
+ * @param {Feature<(LineString|Polygon|MultiLineString|MultiPolygon)>|FeatureCollection|GeometryCollection} feature feature to be simplified
  * @param {Number} tolerance simplification tolerance
  * @param {Boolean} highQuality whether or not to spend more time to create
  * a higher-quality simplification with a different algorithm
- * @return {Feature<(LineString|Polygon)>} a simplified feature
+ * @return {Feature<(LineString|Polygon|MultiLineString|MultiPolygon)>|FeatureCollection|GeometryCollection} a simplified feature
  * @example
   * var feature = {
  *   "type": "Feature",
@@ -59,9 +59,10 @@ module.exports = function(feature, tolerance, highQuality) {
   } else if (feature.type === 'FeatureCollection') {
     feature.features = feature.features.map(function (f) {
       simplified = simplifyHelper(f, tolerance, highQuality);
+
       // we create simpleFeature here because it doesn't apply to GeometryCollection
       // so we can't create it at simplifyHelper()
-      if (['LineString', 'MultiLineString', 'Polygon', 'MultiPolygon'].indexOf(simplified.type) > -1) {
+      if (supportedTypes.indexOf(simplified.type) > -1) {
         return simpleFeature(simplified, f.properties);
       } else {
         return simplified;
@@ -70,18 +71,26 @@ module.exports = function(feature, tolerance, highQuality) {
 
     return feature;
   } else if (feature.type === 'GeometryCollection') {
-    feature.geometries.map(function (g) {
-      simplified = simplifyHelper({
-        type: 'Feature',
-        geometry: g
-      }, tolerance, highQuality);
+    feature.geometries = feature.geometries.map(function (g) {
+      if (supportedTypes.indexOf(g.type) > -1) {
+        simplified = simplifyHelper({
+          type: 'Feature',
+          geometry: g
+        }, tolerance, highQuality);
 
-      return simplified; // GeometryCollection shouldn't have properties
+        return simplified; // GeometryCollection shouldn't have properties
+      }
+      return g;
     });
+
+    return feature;
   } else {
     return feature;
   }
 };
+
+// supported GeoJSON geometries, used to check whether to wrap in simpleFeature()
+var supportedTypes = ['LineString', 'MultiLineString', 'Polygon', 'MultiPolygon'];
 
 function simplifyHelper (feature, tolerance, highQuality) {
   if(feature.geometry.type === 'LineString') {
@@ -106,7 +115,7 @@ function simplifyHelper (feature, tolerance, highQuality) {
     var poly = {
       type: 'Polygon',
       coordinates: simplifyPolygon(feature.geometry.coordinates, tolerance, highQuality)
-    }; console.log(poly);
+    };
 
     return poly;
   } else if(feature.geometry.type === 'MultiPolygon') {
