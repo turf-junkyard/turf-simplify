@@ -136,9 +136,9 @@ function simplifyHelper (feature, tolerance, highQuality) {
 }
 
 /*
-* returns true if ring is a triangle
+* returns true if ring's first coordinate is the same as its last
 */
-function checkTriangle(ring) {
+function checkValidity(ring) {
   if (ring.length < 3) {
     return false;
     //if the last point is the same as the first, it's not a triangle
@@ -183,17 +183,11 @@ function simplifyPolygon (coordinates, tolerance, highQuality) {
       return [coords.x, coords.y];
     });
     //remove 1 percent of tolerance until enough points to make a triangle
-    while (!checkTriangle(simpleRing)) {
+    while (!checkValidity(simpleRing)) {
       tolerance -= tolerance * 0.01;
       simpleRing = simplify(pts, tolerance, highQuality).map(function(coords) {
         return [coords.x, coords.y];
       });
-    }
-    if (simpleRing.length === 3) {
-      simpleRing.push(simpleRing[0]);
-    }
-    for (var i = 0; i < 4; i++) {
-      if (!simpleRing[i]) simpleRing.push(simpleRing[0]);
     }
     if (
       (simpleRing[simpleRing.length-1][0] !== simpleRing[0][0]) ||
